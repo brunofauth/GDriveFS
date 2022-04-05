@@ -12,7 +12,7 @@ REPO_ROOT = Path(os.path.dirname(__file__))
 with open(REPO_ROOT / 'README.rst') as f:
       long_description = f.read()
 
-with open(REPO_ROOT / 'requirements.txt')) as f:
+with open(REPO_ROOT / 'requirements.txt') as f:
       install_requires = [line.strip() for line in f.readlines() if line]
 
 
