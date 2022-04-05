@@ -34,7 +34,7 @@ def _handle_auth_url():
           (url,))
 
 
-def _auth_write(, authcode):
+def _auth_write(authcode):
     gdrivefs.gdfuse.set_auth_cache_filepath(gdrivefs.config.DEFAULT_CREDENTIALS_FILEPATH)
     oa = gdrivefs.oauth_authorize.OauthAuthorize() # It's this class that has to be changed to support 'pass'
     oa.step2_doexchange(authcode)
