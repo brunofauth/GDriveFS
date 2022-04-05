@@ -10,6 +10,7 @@ import os.path
 import webbrowser
 import argparse
 
+import gdrivefs.conf
 import gdrivefs.config
 import gdrivefs.config.log
 import gdrivefs.gdfuse
@@ -35,7 +36,6 @@ def _handle_auth_url():
 
 
 def _auth_write(authcode):
-    gdrivefs.gdfuse.set_auth_cache_filepath(gdrivefs.config.DEFAULT_CREDENTIALS_FILEPATH)
     oa = gdrivefs.oauth_authorize.OauthAuthorize() # It's this class that has to be changed to support 'pass'
     oa.step2_doexchange(authcode)
 
@@ -58,9 +58,14 @@ def main():
     parser.add_argument('-v', '--verbose', action='store_true', help='Print logging')
     parser.add_argument("mode", choices=["auth_get_url", "auth_write", "auth_automatic"])
     parser.add_argument("-c", '--code', help="For 'auth_write' only (but everytime)")
+    parser.add_argument("-p", '--use-pass', action="store_true", help="Store credentials in a pass keys, instead of json file.")
+    parser.add_argument("-s", "--storage-path", help="Where to put the json file or pass key",
+            default=gdrivefs.config.DEFAULT_CREDENTIALS_FILEPATH)
     args = parser.parse_args()
 
     gdrivefs.config.log.configure(is_debug=args.verbose)
+    gdrivefs.conf.Conf.set("use_pass", args.use_pass)
+    gdrivefs.gdfuse.set_auth_cache_filepath(args.storage_path)
 
     if args.mode == 'auth_get_url':
         return _handle_auth_url()
@@ -72,3 +77,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

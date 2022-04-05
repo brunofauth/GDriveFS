@@ -14,63 +14,39 @@ import gdrivefs.gdfuse
 
 _logger = logging.getLogger(__name__)
 
+
 def _main():
     p = argparse.ArgumentParser()
 
-    p.add_argument(
-        'auth_storage_filepath',
-        help="Authorization storage file ('default' for default location in home)")
+    p.add_argument('mountpoint', help='Mount point')
+    p.add_argument("-c", '--credentials', help="Credentials file or pass key", default=gdrivefs.config.DEFAULT_CREDENTIALS_FILEPATH)
+    p.add_argument("-p", "--use-pass", action="store_true", help="Load credentials not from disk, but 'pass'")
 
-    p.add_argument(
-        'mountpoint',
-        help='Mount point')
-
-    p.add_argument(
-        '-o', '--opt',
-        help='Mount options',
-        action='store',
-        required=False,
-        nargs=1)
-
-    p.add_argument(
-        '-f', '--fake',
-        action='store_true',
-        help="Don't mount (causes an early exit; required by 'mount' command)")
-
-    p.add_argument(
-        '-n', '--no-mtab',
-        action='store_true',
-        help="Don't write to /etc/mtab (a no-op since we do not usually write to it; required by 'mount' command)")
-
-    p.add_argument(
-        '-v', '--verbose',
-        action='store_true',
-        help='Print logging')
+    p.add_argument('-v', '--verbose', action='store_true')
+    p.add_argument('-o', '--mount-options', help='Mount options')
+    
+    p.add_argument('-f', '--dry-run', action='store_true', help="Parse args and exit (required by 'mount' command)")
+    p.add_argument('-n', '--no-mtab', action='store_true', help="Unused (required by 'mount' command)")
 
     args = p.parse_args()
 
     gdrivefs.config.log.configure(is_debug=args.verbose)
 
-    option_string = args.opt[0] if args.opt else None
+    option_string = args.mount_options[0] if args.mount_options else None
 
-    if args.auth_storage_filepath.lower() == 'default':
-        auth_storage_filepath = gdrivefs.config.DEFAULT_CREDENTIALS_FILEPATH
-    else:
-        auth_storage_filepath = args.auth_storage_filepath
-
-    _logger.debug("Mounting GD with creds at [%s]: %s",
-                  args.auth_storage_filepath, args.mountpoint)
-
-    if args.fake is True:
+    _logger.debug("Mounting GD with creds at [%s]: %s", args.credentials, args.mountpoint)
+    if args.dry_run:
         _logger.warning("'Fake' mount. Exiting successfully.")
         return
 
     gdrivefs.gdfuse.mount(
-        auth_storage_filepath=auth_storage_filepath,
+        auth_storage_filepath=args.credentials,
+        use_pass=args.use_pass,
         mountpoint=args.mountpoint,
         debug=gdrivefs.config.IS_DEBUG,
         nothreads=gdrivefs.config.IS_DEBUG,
         option_string=option_string)
+
 
 if __name__ == '__main__':
     _main()

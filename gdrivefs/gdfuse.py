@@ -860,12 +860,12 @@ def _parse_kv_items(key: str, value: str | None=None) -> tuple[str, bool]:
     return (key, value)
 
 
-def mount(auth_storage_filepath, mountpoint, debug=None, nothreads=None, 
-          option_string=None):
+def mount(auth_storage_filepath, use_pass: bool, mountpoint, debug=None, nothreads=None, option_string=None):
 
-    if not os.path.exists(auth_storage_filepath):
-        raise ValueError("Credential path is not valid: [%s]" %
-                         (auth_storage_filepath,))
+    if not os.path.exists(auth_storage_filepath) and not use_pass:
+        raise ValueError(f"The given 'CREDENTIALS' path ({auth_storage_filepath!r}) points to nothing")
+    if use_pass and (pw_store_dir := os.environ.get("PASSWORD_STORE_DIR", None)) is None:
+        raise OSError("Please, set the 'PASSWORD_STORE_DIR' variable to a directory to use 'use_pass'")
 
     # If we don't check this here, it'll just cause a headache when things fail
     # during the communication.
@@ -902,6 +902,7 @@ def mount(auth_storage_filepath, mountpoint, debug=None, nothreads=None,
     # options.
 
     set_auth_cache_filepath(auth_storage_filepath)
+    Conf.set('use_pass', use_pass)
 
     # How we'll appear in diskfree, mtab, etc..
     name = "gdfs(%s)".format(auth_storage_filepath)
@@ -920,6 +921,6 @@ def mount(auth_storage_filepath, mountpoint, debug=None, nothreads=None,
             **fuse_opts)
 
 def set_auth_cache_filepath(auth_storage_filepath):
-    auth_storage_filepath = os.path.abspath(auth_storage_filepath)
+    auth_storage_filepath = auth_storage_filepath
 
     Conf.set('auth_cache_filepath', auth_storage_filepath)

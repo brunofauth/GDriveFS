@@ -6,6 +6,8 @@ _logger = logging.getLogger(__name__)
 # TODO(dustin): Move this module to the *config* directory, eliminate this
 #               class, and use the module directly.
 
+SCOPE = ["https://www.googleapis.com/auth/drive"]
+
 
 class Conf(object):
     """Manages options."""
@@ -38,6 +40,8 @@ class Conf(object):
     # currently cached.
     max_readahead_entries = 10
 
+    use_pass: bool                      = False
+
     @staticmethod
     def get(key):
         return Conf.__dict__[key]
@@ -49,7 +53,4 @@ class Conf(object):
 
         setattr(Conf, key, value)
 
-    scopes = [
-        "https://www.googleapis.com/auth/drive",
-    ]
 
