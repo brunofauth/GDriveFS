@@ -1,5 +1,5 @@
 import logging
-from apiclient.discovery import DISCOVERY_URI
+from googleapiclient.discovery import DISCOVERY_URI
 
 _logger = logging.getLogger(__name__)
 

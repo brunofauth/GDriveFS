@@ -13,9 +13,9 @@ import os
 
 import httplib2
 
-import apiclient.discovery
-import apiclient.http
-import apiclient.errors
+import googleapiclient.discovery
+import googleapiclient.http
+import googleapiclient.errors
 
 import gdrivefs.constants
 import gdrivefs.config
@@ -43,7 +43,7 @@ _CONF_SERVICE_VERSION = 'v2'
 _MAX_EMPTY_CHUNKS = 3
 _DEFAULT_UPLOAD_CHUNK_SIZE_B = 1024 * 1024
 
-logging.getLogger('apiclient.discovery').setLevel(logging.WARNING)
+logging.getLogger('googleapiclient.discovery').setLevel(logging.WARNING)
 
 _logger = logging.getLogger(__name__)
 
@@ -70,7 +70,7 @@ def _marshall(f):
                                   e.__class__.__name__, str(e), n)
 
                 time.sleep((2 ** n) + random.randint(0, 1000) / 1000)
-            except apiclient.errors.HttpError as e:
+            except googleapiclient.errors.HttpError as e:
                 decoded = e.content.decode('utf-8')
 
                 if decoded == '':
@@ -156,12 +156,12 @@ class GdriveAuth(object):
 
             try:
                 client = \
-                    apiclient.discovery.build(
+                    googleapiclient.discovery.build(
                         _CONF_SERVICE_NAME,
                         _CONF_SERVICE_VERSION,
                         http=authed_http,
                         discoveryServiceUrl=discoveryUrl)
-            except apiclient.errors.HttpError as e:
+            except googleapiclient.errors.HttpError as e:
                 # We've seen situations where the discovery URL's server is down,
                 # with an alternate one to be used.
                 #
@@ -596,7 +596,7 @@ class _GdriveManager(object):
         if data_filepath:
             args.update({
                 'media_body':
-                    apiclient.http.MediaFileUpload(
+                    googleapiclient.http.MediaFileUpload(
                         data_filepath,
                         mimetype=mime_type,
                         resumable=True,
@@ -635,7 +635,7 @@ class _GdriveManager(object):
         client = self.__auth.get_client()
 
         file_ = \
-            apiclient.http.MediaFileUpload(
+            googleapiclient.http.MediaFileUpload(
                 '/dev/null',
                 mimetype=normalized_entry.mime_type)
 
@@ -713,7 +713,7 @@ class _GdriveManager(object):
             # We can only upload large files using resumable-uploads.
             args.update({
                 'media_body':
-                    apiclient.http.MediaFileUpload(
+                    googleapiclient.http.MediaFileUpload(
                         data_filepath,
                         mimetype=mime_type,
                         resumable=True,

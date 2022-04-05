@@ -6,8 +6,8 @@ try:
   from oauth2client import util
 except ImportError:
   from oauth2client import _helpers as util
-import apiclient.http
-import apiclient.errors
+import googleapiclient.http
+import googleapiclient.errors
 
 DEFAULT_CHUNK_SIZE = 1024 * 512
 
@@ -62,7 +62,7 @@ class ChunkedDownload(object):
              downloaded.
 
         Raises:
-          apiclient.errors.HttpError if the response was not a 2xx.
+          googleapiclient.errors.HttpError if the response was not a 2xx.
           httplib2.HttpLib2Error if a transport error has occured.
         """
 
@@ -124,7 +124,7 @@ class ChunkedDownload(object):
 
                     self._done = True
 
-                    mdp = apiclient.http.MediaDownloadProgress(
+                    mdp = googleapiclient.http.MediaDownloadProgress(
                             self._progress,
                             self._total_size)
 
@@ -189,10 +189,10 @@ class ChunkedDownload(object):
             if self._progress == self._total_size:
                 self._done = True
 
-            return (apiclient.http.MediaDownloadProgress(
+            return (googleapiclient.http.MediaDownloadProgress(
                         self._progress,
                         self._total_size), \
                     self._done, \
                     self._total_size)
         else:
-            raise apiclient.errors.HttpError(resp, content, uri=self._uri)
+            raise googleapiclient.errors.HttpError(resp, content, uri=self._uri)
