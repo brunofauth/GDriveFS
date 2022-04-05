@@ -1,17 +1,20 @@
 #!/usr/bin/env python
 
 import os
+from pathlib import Path
 import setuptools
 
 import gdrivefs
 
-_APP_PATH = os.path.dirname(gdrivefs.__file__)
+REPO_ROOT = Path(os.path.dirname(__file__))
 
-with open(os.path.join(_APP_PATH, 'resources', 'README.rst')) as f:
+
+with open(REPO_ROOT / 'README.rst') as f:
       long_description = f.read()
 
-with open(os.path.join(_APP_PATH, 'resources', 'requirements.txt')) as f:
-      install_requires = [s.strip() for s in f.readlines()]
+with open(REPO_ROOT / 'requirements.txt')) as f:
+      install_requires = [line.strip() for line in f.readlines() if line]
+
 
 setuptools.setup(
     name='gdrivefs',
@@ -38,17 +41,12 @@ setuptools.setup(
     license='GPL 2',
     packages=setuptools.find_packages(exclude=['tests']),
     include_package_data=True,
-    package_data={
-        'gdrivefs': [
-            'resources/README.rst',
-            'resources/requirements.txt',
-        ],
-    },
+    package_data={'gdrivefs': ['resources/client_secrets.json']},
     zip_safe=False,
     install_requires=install_requires,
-    scripts=[
-        'gdrivefs/resources/scripts/gdfs',
-        'gdrivefs/resources/scripts/gdfstool',
-        'gdrivefs/resources/scripts/gdfsdumpentry',
-    ],
+    entry_points={"console_scripts": [
+        "gdfs=gdrivefs.scripts.gdfs:main",
+        "gdfstool=gdrivefs.scripts.gdfstool:main",
+        "gdfsdumpentry=gdrivefs.scripts.gdfsdumpentry:main",
+    ]}
 )
