@@ -24,20 +24,13 @@ def main():
 
     p.add_argument('-v', '--verbose', action='store_true')
     p.add_argument('-o', '--mount-options', help='Mount options')
-    
-    p.add_argument('-f', '--dry-run', action='store_true', help="Parse args and exit (required by 'mount' command)")
-    p.add_argument('-n', '--no-mtab', action='store_true', help="Unused (required by 'mount' command)")
 
     args = p.parse_args()
 
     gdrivefs.config.log.configure(is_debug=args.verbose)
-
     option_string = args.mount_options[0] if args.mount_options else None
 
     _logger.debug("Mounting GD with creds at [%s]: %s", args.credentials, args.mountpoint)
-    if args.dry_run:
-        _logger.warning("'Fake' mount. Exiting successfully.")
-        return
 
     gdrivefs.gdfuse.mount(
         auth_storage_filepath=args.credentials,
