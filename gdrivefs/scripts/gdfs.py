@@ -15,7 +15,7 @@ import gdrivefs.gdfuse
 _logger = logging.getLogger(__name__)
 
 
-def _main():
+def main():
     p = argparse.ArgumentParser()
 
     p.add_argument('mountpoint', help='Mount point')
@@ -49,4 +49,4 @@ def _main():
 
 
 if __name__ == '__main__':
-    _main()
+    main()
