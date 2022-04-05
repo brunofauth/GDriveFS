@@ -16,6 +16,7 @@ from fuse import FUSE, Operations, FuseOSError, c_statvfs, fuse_get_context, \
 
 import oauth2client
 
+from itertools import starmap
 from time import mktime, time
 from sys import argv, exit, excepthook
 from datetime import datetime
@@ -844,10 +845,25 @@ else:
     class GDriveFS(_GdfsMixin, Operations):
         pass
 
+
+def _parse_bool_string(value: str) -> bool:
+    lowercase = value.lower()
+    if lowercase == "true":
+        return True
+    if lowercase == "false":
+        return False
+    raise ValueError("Can't convert '%s' to 'bool'" % value)
+
+
+def _parse_kv_items(key: str, value: str | None=None) -> tuple[str, bool]:
+    converted_value = True if value is None else _parse_bool_string(value)
+    return (key, value)
+
+
 def mount(auth_storage_filepath, mountpoint, debug=None, nothreads=None, 
           option_string=None):
 
-    if os.path.exists(auth_storage_filepath) is False:
+    if not os.path.exists(auth_storage_filepath):
         raise ValueError("Credential path is not valid: [%s]" %
                          (auth_storage_filepath,))
 
@@ -860,39 +876,19 @@ def mount(auth_storage_filepath, mountpoint, debug=None, nothreads=None,
     fuse_opts = {}
     
     if option_string:
-        for opt_parts in [opt.split('=', 1) \
-                          for opt \
-                          in option_string.split(',') ]:
-            k = opt_parts[0]
-
-            # We need to present a bool type for on/off flags. Since all we
-            # have are strings, we'll convert anything with a 'True' or 'False'
-            # to a bool, or anything with just a key to True.
-            if len(opt_parts) == 2:
-                v = opt_parts[1]
-                v_lower = v.lower()
-
-                if v_lower == 'true':
-                    v = True
-                elif v_lower == 'false':
-                    v = False
-            else:
-                v = True
-
-            # We have a list of provided options. See which match against our 
-            # application options.
-
-            _logger.debug("Setting option [%s] to [%s].", k, v)
+        raw_options = (opt.split('=', 1) for opt in option_string.split(','))
+        for key, value in starmap(_parse_kv_items, raw_options):
+            _logger.debug("Setting option [%s] to [%s].", key, value)
 
             try:
-                Conf.set(k, v)
+                Conf.set(key, value)
             except KeyError as e:
                 _logger.debug("Forwarding option [%s] with value [%s] to "
-                              "FUSE.", k, v)
+                              "FUSE.", key, value)
 
-                fuse_opts[k] = v
+                fuse_opts[key] = value
 
-    if gdrivefs.config.IS_DEBUG is True:
+    if gdrivefs.config.IS_DEBUG:
         _logger.debug("FUSE options:\n%s", pprint.pformat(fuse_opts))
 
     _logger.debug("PERMS: F=%s E=%s NE=%s",

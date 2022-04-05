@@ -4,6 +4,7 @@ import pickle
 import json
 import datetime
 import tempfile
+from pathlib import Path
 
 import oauth2client.client
 
@@ -14,38 +15,25 @@ import gdrivefs.errors
 
 _LOGGER = logging.getLogger(__name__)
 _LOGGER.setLevel(logging.INFO)
+BUNDLED_CLIENT_SECRETS_PATH = Path(__file__).parent / "resources" / "client_secrets.json"
 
 
 class OauthAuthorize(object):
     """Manages authorization process."""
 
-    def __init__(
-            self, redirect_uri=oauth2client.client.OOB_CALLBACK_URN):
-        creds_filepath  = gdrivefs.conf.Conf.get('auth_cache_filepath')
+    def __init__(self, redirect_uri=oauth2client.client.OOB_CALLBACK_URN):
 
-        assert \
-            creds_filepath is not None, \
-            "Credentials file-path not set."
+        if (_cache_filepath := gdrivefs.conf.Conf.get('auth_cache_filepath')) is None:
+            raise ValueError( "Credentials file-path not set.")
 
-        creds_path = os.path.dirname(creds_filepath)
-        if creds_path != '' and \
-           os.path.exists(creds_path) is False:
-            os.makedirs(creds_path)
-
-        self.__creds_filepath = creds_filepath
+        self.__creds_filepath = Path(_cache_filepath)
+        self.__creds_filepath.parent.mkdir(exist_ok=True)
         self.__credentials = None
 
-        api_credentials = gdrivefs.conf.Conf.get('api_credentials')
-
-        with tempfile.NamedTemporaryFile(mode='w+') as f:
-            json.dump(api_credentials, f)
-            f.flush()
-
-            self.flow = \
-                oauth2client.client.flow_from_clientsecrets(
-                    f.name,
-                    scope=self.__get_scopes(),
-                    redirect_uri=redirect_uri)
+        self.flow = oauth2client.client.flow_from_clientsecrets(
+            BUNDLED_CLIENT_SECRETS_PATH,
+            scope=self.__get_scopes(),
+            redirect_uri=redirect_uri)
 
     def __get_scopes(self):
         return ' '.join(gdrivefs.conf.Conf().scopes)
@@ -54,11 +42,7 @@ class OauthAuthorize(object):
         return self.flow.step1_get_authorize_url()
 
     def __clear_cache(self):
-        if self.__creds_filepath is not None:
-            try:
-                os.remove(self.__creds_filepath)
-            except:
-                pass
+        self.__creds_filepath.unlink(missing_ok=True)
 
     def __refresh_credentials(self):
         _LOGGER.debug("Doing credentials refresh.")
@@ -77,34 +61,28 @@ class OauthAuthorize(object):
     def __step2_check_auth_cache(self):
         # Attempt to read cached credentials.
 
-        if self.__creds_filepath is None:
-            raise ValueError("Credentials file-path is not set.")
+        if self.__credentials is not None:
+            return self.__credentials
 
-        if self.__credentials is None:
-            _LOGGER.debug("Checking for cached credentials: %s",
-                          self.__creds_filepath)
+        _LOGGER.debug("Checking for cached credentials: %s", self.__creds_filepath)
 
-            # If we're here, we have serialized credentials information.
+        # If we're here, we have serialized credentials information.
 
-            try:
-                with open(self.__creds_filepath, 'rb') as f:
-                    credentials = pickle.load(f)
-            except:
-                # We couldn't decode the credentials. Kill the cache.
-                self.__clear_cache()
-                raise
+        try:
+            with open(self.__creds_filepath, 'rb') as f:
+                credentials = pickle.load(f)
+        except (pickle.UnpicklingError, OSError):
+            # We couldn't decode the credentials. Kill the cache.
+            self.__clear_cache()
+            raise
 
-            self.__credentials = credentials
+        self.__credentials = credentials
 
-            # Credentials restored. Check expiration date.
+        # Credentials restored. Check expiration date.
 
-            expiry_phrase = self.__credentials.token_expiry.strftime(
-                                '%Y%m%d-%H%M%S')
-
-            _LOGGER.debug("Cached credentials found with expire-date [%s].",
-                          expiry_phrase)
-
-            self.check_credential_state()
+        expiry_phrase = self.__credentials.token_expiry.strftime('%Y%m%d-%H%M%S')
+        _LOGGER.debug("Cached credentials found with expire-date [%s].", expiry_phrase)
+        self.check_credential_state()
 
         return self.__credentials
 

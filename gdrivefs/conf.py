@@ -10,16 +10,6 @@ _logger = logging.getLogger(__name__)
 class Conf(object):
     """Manages options."""
 
-    api_credentials = {
-        "web": {
-            "client_id": "1037099463298-7b3a9u7g8q8irvemvc265c8uo65srrhv.apps.googleusercontent.com",
-            "client_secret": "Iz2xzuGEBNl3jPrR0J6GxqRR",
-            "redirect_uris": [],
-            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-            "token_uri": "https://accounts.google.com/o/oauth2/token"
-        }
-    }
-
     auth_cache_filepath                 = None
 #    gd_to_normal_mapping_filepath       = '/etc/gdfs/mime_mapping.json'
     extension_mapping_filepath          = '/etc/gdfs/extension_mapping.json'
