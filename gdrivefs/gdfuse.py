@@ -1,11 +1,6 @@
 import logging
 import stat
-import dateutil.parser
-import re
-import json
 import os
-import atexit
-import resource
 import pprint
 import math
 import collections
@@ -57,7 +52,7 @@ _YIELDED_ENTRY = \
 
 # TODO: make sure strip_extension and split_path are used when each are relevant
 # TODO: make sure create path reserves a file-handle, uploads the data, and then registers the open-file with the file-handle.
-# TODO: Make sure that we rely purely on the FH, whenever it is given, 
+# TODO: Make sure that we rely purely on the FH, whenever it is given,
 #       whereever it appears. This will be to accomodate system calls that can work either via file-path or file-handle.
 
 def set_datetime_tz(datetime_obj, tz):
@@ -69,7 +64,7 @@ def get_entry_or_raise(raw_path, allow_normal_for_missing=False):
         (parent_clause, path, filename, mime_type, is_hidden) = result
     except GdNotFoundError:
         _logger.exception("Could not retrieve clause for non-existent "
-                          "file-path [%s] (parent does not exist)." % 
+                          "file-path [%s] (parent does not exist)." %
                           (raw_path))
 
         if allow_normal_for_missing is True:
@@ -77,7 +72,7 @@ def get_entry_or_raise(raw_path, allow_normal_for_missing=False):
         else:
             raise FuseOSError(ENOENT)
     except:
-        _logger.exception("Could not process file-path [%s]." % 
+        _logger.exception("Could not process file-path [%s]." %
                           (raw_path))
         raise FuseOSError(EIO)
 
@@ -88,7 +83,7 @@ def get_entry_or_raise(raw_path, allow_normal_for_missing=False):
         entry_clause = path_relations.get_clause_from_path(filepath)
     except GdNotFoundError:
         _logger.exception("Could not retrieve clause for non-existent "
-                          "file-path [%s] (parent exists)." % 
+                          "file-path [%s] (parent exists)." %
                           (filepath))
 
         if allow_normal_for_missing is True:
@@ -149,9 +144,9 @@ class _GdfsMixin(object):
             "st_uid":   uid,
             "st_gid":   gid,
         }
-        
+
         if entry.is_directory:
-            # Per http://sourceforge.net/apps/mediawiki/fuse/index.php?title=SimpleFilesystemHowto, 
+            # Per http://sourceforge.net/apps/mediawiki/fuse/index.php?title=SimpleFilesystemHowto,
             # default size should be 4K.
 # TODO(dustin): Should we just make this (0), since that's what it is?
             stat_result["st_size"] = 1024 * 4
@@ -168,7 +163,7 @@ class _GdfsMixin(object):
 
         stat_result["st_blocks"] = \
             int(math.ceil(float(stat_result["st_size"]) / block_size_b))
-  
+
         return stat_result
 
     @dec_hint(['raw_path', 'fh'])
@@ -194,7 +189,7 @@ class _GdfsMixin(object):
                             "non-zero offset (%d). This is not allowed.",
                             path, offset)
 
-# TODO: Once we start working on the cache, make sure we don't make this call, 
+# TODO: Once we start working on the cache, make sure we don't make this call,
 #       constantly.
 
         path_relations = PathRelations.get_instance()
@@ -228,7 +223,7 @@ class _GdfsMixin(object):
         # Yield filenames with stat information.
 
         for (filename, entry) in entry_tuples:
-            # Decorate any file that -requires- a mime-type (all files can 
+            # Decorate any file that -requires- a mime-type (all files can
             # merely accept a mime-type)
             if entry.requires_mimetype:
                 filename += utility.translate_filename_charset('#')
@@ -288,8 +283,8 @@ class _GdfsMixin(object):
 
         try:
             entry = gd.create_directory(
-                        filename, 
-                        [parent_id], 
+                        filename,
+                        [parent_id],
                         is_hidden=is_hidden)
         except:
             _logger.exception("Could not create directory with name [%s] "
@@ -313,8 +308,8 @@ class _GdfsMixin(object):
 # TODO: Find a way to implement or enforce 'mode'.
     def __create(self, filepath, mode=None):
         """Create a new file.
-                
-        We don't implement "mode" (permissions) because the model doesn't agree 
+
+        We don't implement "mode" (permissions) because the model doesn't agree
         with GD.
         """
 
@@ -344,8 +339,8 @@ class _GdfsMixin(object):
 
         try:
             entry = gd.create_file(
-                        filename, 
-                        [parent_clause[3]], 
+                        filename,
+                        [parent_clause[3]],
                         mime_type,
                         is_hidden=is_hidden)
         except:
@@ -385,10 +380,10 @@ class _GdfsMixin(object):
 
         try:
             opened_file = gdrivefs.opened_file.OpenedFile(
-                            entry.id, 
-                            path, 
-                            filename, 
-                            not entry.is_visible, 
+                            entry.id,
+                            path,
+                            filename,
+                            not entry.is_visible,
                             mime_type)
         except:
             _logger.exception("Could not create OpenedFile object for "
@@ -480,7 +475,7 @@ class _GdfsMixin(object):
 
     @dec_hint(['filepath', 'fh'])
     def flush(self, filepath, fh):
-        
+
         om = gdrivefs.opened_file.get_om()
 
         try:
@@ -521,7 +516,7 @@ class _GdfsMixin(object):
         # Check if not a directory.
 
         if not normalized_entry.is_directory:
-            _logger.error("Can not rmdir() non-directory [%s] with ID [%s].", 
+            _logger.error("Can not rmdir() non-directory [%s] with ID [%s].",
                           filepath, entry_id)
 
             raise FuseOSError(ENOTDIR)
@@ -694,10 +689,10 @@ class _GdfsMixin(object):
             _logger.exception("Could not truncate entry [%s].", entry)
             raise FuseOSError(EIO)
 
-# TODO(dustin): It would be a lot quicker if we truncate our temporary file 
+# TODO(dustin): It would be a lot quicker if we truncate our temporary file
 #               here, and make sure its mtime matches.
 
-        # We don't need to update our internal representation of the file (just 
+        # We don't need to update our internal representation of the file (just
         # our file-handle and its related buffering).
 
     @dec_hint(['file_path'])
@@ -735,7 +730,7 @@ class _GdfsMixin(object):
 
             raise FuseOSError(errno.EISDIR)
 
-        # Remove online. Complements local removal (if not found locally, a 
+        # Remove online. Complements local removal (if not found locally, a
         # follow-up request checks online).
 
         gd = get_gdrive()
@@ -784,7 +779,7 @@ class _GdfsMixin(object):
 
         try:
             entry = gd.update_entry(
-                        entry, 
+                        entry,
                         modified_datetime=mtime_phrase,
                         accessed_datetime=atime_phrase)
         except:
@@ -874,7 +869,7 @@ def mount(auth_storage_filepath, use_pass: bool, mountpoint, debug=None, nothrea
         raise Exception("Google does not like oauth2client >=4.0.0 .")
 
     fuse_opts = {}
-    
+
     if option_string:
         raw_options = (opt.split('=', 1) for opt in option_string.split(','))
         for key, value in starmap(_parse_kv_items, raw_options):
@@ -892,11 +887,11 @@ def mount(auth_storage_filepath, use_pass: bool, mountpoint, debug=None, nothrea
         _logger.debug("FUSE options:\n%s", pprint.pformat(fuse_opts))
 
     _logger.debug("PERMS: F=%s E=%s NE=%s",
-                  Conf.get('default_perm_folder'), 
-                  Conf.get('default_perm_file_editable'), 
+                  Conf.get('default_perm_folder'),
+                  Conf.get('default_perm_file_editable'),
                   Conf.get('default_perm_file_noneditable'))
 
-    # Assume that any option that wasn't an application option is a FUSE 
+    # Assume that any option that wasn't an application option is a FUSE
     # option. The Python-FUSE interface that we're using is beautiful/elegant,
     # but there's no help support. The user is just going to have to know the
     # options.
@@ -913,11 +908,11 @@ def mount(auth_storage_filepath, use_pass: bool, mountpoint, debug=None, nothrea
 
     fuse = FUSE(
             gdfs,
-            mountpoint, 
-            debug=debug, 
-            foreground=debug, 
-            nothreads=nothreads, 
-            fsname=name, 
+            mountpoint,
+            debug=debug,
+            foreground=debug,
+            nothreads=nothreads,
+            fsname=name,
             **fuse_opts)
 
 def set_auth_cache_filepath(auth_storage_filepath):

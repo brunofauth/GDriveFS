@@ -1,6 +1,5 @@
 import logging
 import resource
-import re
 import os
 import tempfile
 import shutil
@@ -8,7 +7,7 @@ import threading
 
 import fuse
 
-from errno import *
+from errno import EIO, EMFILE, ENOENT
 
 from gdrivefs.conf import Conf
 from gdrivefs.errors import ExportFormatError, GdNotFoundError
@@ -380,7 +379,7 @@ class OpenedFile(object):
 
             _LOGGER.debug("Update successful. Updating local cache.")
 
-            path_relations = PathRelations.get_instance()
+            path_relations = PathRelations.get_instance() #type: ignore
             path_relations.register_entry(entry)
 
             _LOGGER.info("Update complete on entry with ID [%s].", entry.id)

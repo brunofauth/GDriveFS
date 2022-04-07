@@ -6,16 +6,16 @@ _logger = logging.getLogger(__name__)
 
 
 class CacheClientBase(object):
-    """Meant to be inherited by a class. Is used to configure a particular 
+    """Meant to be inherited by a class. Is used to configure a particular
     namespace within the cache.
     """
 
 
 
-# TODO(dustin): This is a terrible object, and needs to be refactored. It 
-#               doesn't provide any way to cleanup itself or CacheAgent, or any 
-#               way to invoke a singleton of CacheAgent whose thread we can 
-#               easier start or stop. Since this larger *wraps* CacheAgent, we 
+# TODO(dustin): This is a terrible object, and needs to be refactored. It
+#               doesn't provide any way to cleanup itself or CacheAgent, or any
+#               way to invoke a singleton of CacheAgent whose thread we can
+#               easier start or stop. Since this larger *wraps* CacheAgent, we
 #               might just dispose of it.
 
 
@@ -27,8 +27,8 @@ class CacheClientBase(object):
         except:
             pass
 
-        self.__cache = CacheAgent(self.child_type, self.max_age, 
-                                 fault_handler=self.fault_handler, 
+        self.__cache = CacheAgent(self.child_type, self.max_age,
+                                 fault_handler=self.fault_handler,
                                  cleanup_pretrigger=self.cleanup_pretrigger)
 
         return self.__cache
@@ -36,7 +36,7 @@ class CacheClientBase(object):
     def __init__(self):
         child_type = self.__class__.__bases__[0].__name__
         max_age = self.get_max_cache_age_seconds()
-        
+
         _logger.debug("CacheClientBase(%s,%s)" % (child_type, max_age))
 
         self.child_type = child_type

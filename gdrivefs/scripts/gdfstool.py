@@ -7,7 +7,6 @@ sys.path.insert(0, dev_path)
 
 import logging
 import os.path
-import webbrowser
 import argparse
 
 import gdrivefs.conf

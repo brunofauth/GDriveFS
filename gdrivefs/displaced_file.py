@@ -28,15 +28,15 @@ class DisplacedFile(object):
         os.unlink(self.__filepath)
 
     def deposit_file(self, mime_type):
-        """Write the file to a temporary path, and present a stub (JSON) to the 
-        user. This is the only way of getting files that don't have a 
+        """Write the file to a temporary path, and present a stub (JSON) to the
+        user. This is the only way of getting files that don't have a
         well-defined filesize without providing a type, ahead of time.
         """
 
         gd = get_gdrive()
 
         result = gd.download_to_local(
-                    self.__filepath, 
+                    self.__filepath,
                     self.__normalized_entry,
                     mime_type)
 

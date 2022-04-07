@@ -10,7 +10,7 @@ class AuthorizationError(GdFsError):
 class AuthorizationFailureError(AuthorizationError):
     """There was a general authorization failure."""
     pass
-        
+
 
 class AuthorizationFaultError(AuthorizationError):
     """Our authorization is not available or has expired."""

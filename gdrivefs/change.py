@@ -53,7 +53,7 @@ class _ChangeManager(object):
                 # Force another check, soon.
                 is_done = False
 
-            # If there are still more changes, take them as quickly as 
+            # If there are still more changes, take them as quickly as
             # possible.
             if is_done is True:
                 _logger.debug("No more changes. Waiting.")
@@ -80,7 +80,7 @@ class _ChangeManager(object):
         """Process any changes to our files. Return True if everything is up to
         date or False if we need to be run again.
         """
-# TODO(dustin): Reimplement using the "watch" interface. We'll have to find 
+# TODO(dustin): Reimplement using the "watch" interface. We'll have to find
 #               more documentation:
 #
 #               https://developers.google.com/drive/v2/reference/changes/watch
@@ -99,7 +99,7 @@ class _ChangeManager(object):
         _logger.debug("(%d) changes will now be applied.", len(changes))
 
         for change_id, change_tuple in changes:
-            # Apply the changes. We expect to be running them from oldest to 
+            # Apply the changes. We expect to be running them from oldest to
             # newest.
 
             _logger.debug("========== Change with ID (%d) will now be applied. ==========",
@@ -118,16 +118,16 @@ class _ChangeManager(object):
         return (next_page_token is None)
 
     def __apply_change(self, change_id, change_tuple):
-        """Apply changes to our filesystem reported by GD. All we do is remove 
-        the current record components, if it's valid, and then reload it with 
+        """Apply changes to our filesystem reported by GD. All we do is remove
+        the current record components, if it's valid, and then reload it with
         what we were given. Note that since we don't necessarily know
         about the entries that have been changed, this also allows us to slowly
-        increase our knowledge of the filesystem (of, obviously, only those 
+        increase our knowledge of the filesystem (of, obviously, only those
         things that change).
         """
 
         (entry_id, was_deleted, entry) = change_tuple
-        
+
         is_visible = entry.is_visible if entry else None
 
         _logger.debug("Applying change with change-ID (%d), entry-ID [%s], "

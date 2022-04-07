@@ -35,7 +35,7 @@ except ImportError:
     def arguments_from_url(url):
         u = urlparse.urlparse(url)
         arguments = urlparse.parse_qs(u.query)
-        
+
         return arguments
 else:
     def arguments_from_url(url):

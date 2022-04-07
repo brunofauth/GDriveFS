@@ -69,11 +69,11 @@ class PathRelations(object):
             current_entry_id = to_remove.popleft()
             entry_clause = self.entry_ll[current_entry_id]
 
-            # Any entry that still has children will be transformed into a 
-            # placeholder, and not actually removed. Once the children are 
-            # removed in this recursive process, we'll naturally clean-up the 
-            # parent as a last step. Therefore, the number of placeholders will 
-            # overlap with the number of folders (a placeholder must represent 
+            # Any entry that still has children will be transformed into a
+            # placeholder, and not actually removed. Once the children are
+            # removed in this recursive process, we'll naturally clean-up the
+            # parent as a last step. Therefore, the number of placeholders will
+            # overlap with the number of folders (a placeholder must represent
             # a folder. It is only there because the entry had children).
 
             if not entry_clause[0]:
@@ -89,7 +89,7 @@ class PathRelations(object):
 
             (current_orphan_ids, current_children_clauses) = result
 
-            children_ids_to_remove = [ children[3] for children 
+            children_ids_to_remove = [ children[3] for children
                                                 in current_children_clauses ]
 
             to_remove.extend(current_orphan_ids)
@@ -98,9 +98,9 @@ class PathRelations(object):
         return (list(removed.keys()), (stat_folders + stat_files))
 
     def __remove_entry(self, entry_id, is_update=False):
-        """Remove an entry. Updates references from linked entries, but does 
-        not remove any other entries. We return a tuple, where the first item 
-        is a list of any parents that, themselves, no longer have parents or 
+        """Remove an entry. Updates references from linked entries, but does
+        not remove any other entries. We return a tuple, where the first item
+        is a list of any parents that, themselves, no longer have parents or
         children, and the second item is a list of children to this entry.
         """
 
@@ -108,7 +108,7 @@ class PathRelations(object):
             # Ensure that the entry-ID is valid.
 
             entry_clause = self.entry_ll[entry_id]
-            
+
             # Clip from path cache.
 
             if entry_id in self.path_cache_byid:
@@ -125,7 +125,7 @@ class PathRelations(object):
             children_to_remove = [ ]
             if entry_parents:
                 for parent_clause in entry_parents:
-                    # A placeholder has an entry and parents field (fields 
+                    # A placeholder has an entry and parents field (fields
                     # 0, 1) of None.
 
                     (parent, parent_parents, parent_children, parent_id, \
@@ -134,19 +134,19 @@ class PathRelations(object):
                     if all_children_loaded and not is_update:
                         all_children_loaded = False
 
-                    # Integrity-check that the parent we're referencing is 
+                    # Integrity-check that the parent we're referencing is
                     # still in the list.
                     if parent_id not in self.entry_ll:
                         _logger.warn("Parent with ID [%s] on entry with ID "
-                                     "[%s] is not valid." % 
+                                     "[%s] is not valid." %
                                      (parent_id, entry_id))
                         continue
-            
-                    old_children_filenames = [ child_tuple[0] for child_tuple 
+
+                    old_children_filenames = [ child_tuple[0] for child_tuple
                                                 in parent_children ]
 
-                    updated_children = [ child_tuple for child_tuple 
-                                         in parent_children 
+                    updated_children = [ child_tuple for child_tuple
+                                         in parent_children
                                          if child_tuple[1] != entry_clause ]
 
                     if parent_children != updated_children:
@@ -154,14 +154,14 @@ class PathRelations(object):
 
                     else:
                         _logger.error("Entry with ID [%s] referenced parent "
-                                      "with ID [%s], but not vice-versa." % 
+                                      "with ID [%s], but not vice-versa." %
                                       (entry_id, parent_id))
 
-                    updated_children_filenames = [ child_tuple[0] 
+                    updated_children_filenames = [ child_tuple[0]
                                                     for child_tuple
                                                     in parent_children ]
 
-                    # If the parent now has no children and is a placeholder, 
+                    # If the parent now has no children and is a placeholder,
                     # advise that we remove it.
                     if not parent_children and parent == None:
                         parents_to_remove.append(parent_id)
@@ -171,7 +171,7 @@ class PathRelations(object):
             set_placeholder = len(entry_children_tuples) > 0
 
             if set_placeholder:
-                # Just nullify the entry information, but leave the clause. We 
+                # Just nullify the entry information, but leave the clause. We
                 # had children that still need a parent.
 
                 entry_clause[0] = None
@@ -179,24 +179,24 @@ class PathRelations(object):
             else:
                 del self.entry_ll[entry_id]
 
-        children_entry_clauses = [ child_tuple[1] for child_tuple 
+        children_entry_clauses = [ child_tuple[1] for child_tuple
                                     in entry_children_tuples ]
 
         return (parents_to_remove, children_entry_clauses)
 
     def remove_entry_all(self, entry_id, is_update=False):
-        """Remove the the entry from both caches. EntryCache is more of an 
-        entity look-up, whereas this (PathRelations) has a bunch of expanded 
-        data regarding relationships and paths. This call will first remove the 
+        """Remove the the entry from both caches. EntryCache is more of an
+        entity look-up, whereas this (PathRelations) has a bunch of expanded
+        data regarding relationships and paths. This call will first remove the
         relationships from here, and then the entry from the EntryCache.
 
         We do it in this order because if we were to remove entry from the core
-        library (EntryCache) first, then all of the relationships here will 
+        library (EntryCache) first, then all of the relationships here will
         suddenly become invalid, and although the entry will be disregistered,
         because it has references from this linked-list, those objects will be
-        very much alive. On the other hand, if we remove the entry from 
+        very much alive. On the other hand, if we remove the entry from
         PathRelations first, then, because of the locks, PathRelations will not
-        be able to touch the relationships until after we're done, here. Ergo, 
+        be able to touch the relationships until after we're done, here. Ergo,
         the only thing that can happen is that something may look at the entry
         in the library.
         """
@@ -227,14 +227,14 @@ class PathRelations(object):
 
     def get_proper_filenames(self, entry_clause):
         """Return what was determined to be the unique filename for this "
-        particular entry for each of its respective parents. This will return 
-        the standard 'title' value as a scalar when the root entry, and a 
+        particular entry for each of its respective parents. This will return
+        the standard 'title' value as a scalar when the root entry, and a
         dictionary of parent-IDs to unique-filenames when not.
 
-        This call is necessary because GD allows duplicate filenames until any 
-        one folder. Note that a consequence of both this and the fact that GD 
-        allows the same file to be listed under multiple folders means that a 
-        file may look like "filename" under one and "filename (2)" under 
+        This call is necessary because GD allows duplicate filenames until any
+        one folder. Note that a consequence of both this and the fact that GD
+        allows the same file to be listed under multiple folders means that a
+        file may look like "filename" under one and "filename (2)" under
         another.
         """
 
@@ -246,14 +246,14 @@ class PathRelations(object):
 
             else:
                 for parent_clause in parents:
-                    matching_children = [filename for filename, child_clause 
-                                                  in parent_clause[2] 
+                    matching_children = [filename for filename, child_clause
+                                                  in parent_clause[2]
                                                   if child_clause == entry_clause]
                     if not matching_children:
                         _logger.error("No matching entry-ID [%s] was not "
                                       "found among children of entry's "
                                       "parent with ID [%s] for proper-"
-                                      "filename lookup." % 
+                                      "filename lookup." %
                                       (entry_clause[3], parent_clause[3]))
 
                     else:
@@ -269,7 +269,7 @@ class PathRelations(object):
 
             if normalized_entry.__class__ is not gdrivefs.normal_entry.NormalEntry:
                 raise Exception("PathRelations expects to register an object "
-                                "of type NormalEntry, not [%s]." % 
+                                "of type NormalEntry, not [%s]." %
                                 (type(normalized_entry)))
 
             entry_id = normalized_entry.id
@@ -286,9 +286,9 @@ class PathRelations(object):
 
             # We do a linked list using object references.
             # (
-            #   normalized_entry, 
-            #   [ parent clause, ... ], 
-            #   [ child clause, ... ], 
+            #   normalized_entry,
+            #   [ parent clause, ... ],
+            #   [ child clause, ... ],
             #   entry-ID,
             #   < boolean indicating that we know about all children >
             # )
@@ -322,20 +322,20 @@ class PathRelations(object):
                 parent_children = parent_clause[CLAUSE_CHILDREN]
                 filename_base = title_fs
 
-                # Register among the children of this parent, but make sure we 
+                # Register among the children of this parent, but make sure we
                 # have a unique filename among siblings.
 
                 i = 0
                 current_variation = filename_base
                 elected_variation = None
                 while i <= 255:
-                    if not [ child_name_tuple 
-                             for child_name_tuple 
-                             in parent_children 
+                    if not [ child_name_tuple
+                             for child_name_tuple
+                             in parent_children
                              if child_name_tuple[0] == current_variation ]:
                         elected_variation = current_variation
                         break
-                        
+
                     i += 1
                     current_variation = \
                         filename_base + \
@@ -348,7 +348,7 @@ class PathRelations(object):
                                   "that directory." % (entry_id))
                     return
 
-                # Register us in the list of children on this parents 
+                # Register us in the list of children on this parents
                 # child-tuple list.
                 parent_children.append((elected_variation, entry_clause))
 
@@ -376,7 +376,7 @@ class PathRelations(object):
         _logger.debug("__load_all_children: [STOP] parent_id=[{}]".format(parent_id))
 
     def get_children_from_entry_id(self, entry_id):
-        """Return the filenames contained in the folder with the given 
+        """Return the filenames contained in the folder with the given
         entry-ID.
         """
 
@@ -408,8 +408,8 @@ class PathRelations(object):
 
         children_tuples = self.get_children_from_entry_id(entry_id)
 
-        children_entries = [(child_tuple[0], child_tuple[1][CLAUSE_ENTRY]) 
-                                for child_tuple 
+        children_entries = [(child_tuple[0], child_tuple[1][CLAUSE_ENTRY])
+                                for child_tuple
                                 in children_tuples]
 
         return children_entries
@@ -434,8 +434,8 @@ class PathRelations(object):
             return self.entry_ll[entry_id]
 
     def find_path_components_goandget(self, path):
-        """Do the same thing that find_path_components() does, except that 
-        when we don't have record of a path-component, try to go and find it 
+        """Do the same thing that find_path_components() does, except that
+        when we don't have record of a path-component, try to go and find it
         among the children of the previous path component, and then try again.
         """
 
@@ -459,8 +459,8 @@ class PathRelations(object):
                 if result[2] == True:
                     return result
 
-                # If we could not resolve the entire path, and we're no more 
-                # successful than a prior attempt, we'll just have to return a 
+                # If we could not resolve the entire path, and we're no more
+                # successful than a prior attempt, we'll just have to return a
                 # partial.
 
                 num_results = len(result[0])
@@ -469,25 +469,25 @@ class PathRelations(object):
 
                 previous_results.append(num_results)
 
-                # Else, we've encountered a component/depth of the path that we 
+                # Else, we've encountered a component/depth of the path that we
                 # don't currently know about.
-# TODO: This is going to be the general area that we'd have to adjust to 
-#        support multiple, identical entries. This currently only considers the 
-#        first result. We should rewrite this to be recursive in order to make 
+# TODO: This is going to be the general area that we'd have to adjust to
+#        support multiple, identical entries. This currently only considers the
+#        first result. We should rewrite this to be recursive in order to make
 #        it easier to keep track of a list of results.
                 # The parent is the last one found, or the root if none.
                 if num_results:
                     parent_id = result[0][num_results - 1]
-                else:   
+                else:
                     parent_id = gdrivefs.account_info.AccountInfo.get_instance().root_id
 
                 # The child will be the first part that was not found.
                 child_name = result[1][num_results]
 
                 children = gd.list_files(
-                                parent_id=parent_id, 
+                                parent_id=parent_id,
                                 query_is_string=child_name)
-                
+
                 for child in children:
                     self.register_entry(child)
 
@@ -501,9 +501,9 @@ class PathRelations(object):
         _logger.debug("find_path_components_goandget: [STOP] path=[{}]".format(path))
 
     def __find_path_components(self, path):
-        """Given a path, return a list of all Google Drive entries that 
-        comprise each component, or as many as can be found. As we've ensured 
-        that all sibling filenames are unique, there can not be multiple 
+        """Given a path, return a list of all Google Drive entries that
+        comprise each component, or as many as can be found. As we've ensured
+        that all sibling filenames are unique, there can not be multiple
         matches.
         """
 
@@ -541,22 +541,22 @@ class PathRelations(object):
 #                                 i, child_filename_to_search_fs, entry_ptr)
 
                 current_clause = self.entry_ll[entry_ptr]
-            
-                # Search this entry's children for the next filename further down 
-                # in the path among this entry's children. Any duplicates should've 
-                # already beeen handled as entries were stored. We name the variable 
-                # just to emphasize that no ambiguity -as well as- no error will 
+
+                # Search this entry's children for the next filename further down
+                # in the path among this entry's children. Any duplicates should've
+                # already beeen handled as entries were stored. We name the variable
+                # just to emphasize that no ambiguity -as well as- no error will
                 # occur in the traversal process.
                 first_matching_child_clause = None
                 children = current_clause[2]
-            
+
                 # If they just wanted the "" path (root), return the root-ID.
                 if path == "":
                     found = [ root_id ]
                 else:
-                    found = [ child_tuple[1][3] 
-                              for child_tuple 
-                              in children 
+                    found = [ child_tuple[1][3]
+                              for child_tuple
+                              in children
                               if child_tuple[0] == child_filename_to_search_fs ]
 
                 if found:
@@ -577,7 +577,7 @@ class PathRelations(object):
                 i += 1
 
     def __get_entry_clause_by_id(self, entry_id):
-        """We may keep a linked-list of GD entries, but what we have may just 
+        """We may keep a linked-list of GD entries, but what we have may just
         be placeholders. This function will make sure the data is actually here.
         """
 
@@ -646,8 +646,8 @@ class EntryCache(gdrivefs.cacheclient_base.CacheClientBase):
 
         # Read the entries, now.
 
-# TODO: We have to determine when this is called, and either remove it 
-# (if it's not), or find another way to not have to load them 
+# TODO: We have to determine when this is called, and either remove it
+# (if it's not), or find another way to not have to load them
 # individually.
 
         retrieved = self.__gd.get_entries(affected_entries)

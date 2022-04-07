@@ -21,7 +21,7 @@ class CacheRegistry(object):
 
     @staticmethod
     def get_instance(resource_name):
-    
+
         with CacheRegistry.__rlock:
             try:
                 CacheRegistry.__instance;
@@ -35,7 +35,7 @@ class CacheRegistry(object):
 
     def set(self, resource_name, key, value):
 
-        _logger.debug("CacheRegistry.set(%s,%s,%s)" % 
+        _logger.debug("CacheRegistry.set(%s,%s,%s)" %
                       (resource_name, key, value))
 
         with CacheRegistry.__rlock:
@@ -50,27 +50,27 @@ class CacheRegistry(object):
 
     def remove(self, resource_name, key, cleanup_pretrigger=None):
 
-        _logger.debug("CacheRegistry.remove(%s,%s,%s)" % 
+        _logger.debug("CacheRegistry.remove(%s,%s,%s)" %
                       (resource_name, key, type(cleanup_pretrigger)))
 
         with CacheRegistry.__rlock:
             old_tuple = self.__cache[resource_name][key]
 
             self.__cleanup_entry(
-                resource_name, 
-                key, 
-                True, 
+                resource_name,
+                key,
+                True,
                 cleanup_pretrigger=cleanup_pretrigger)
 
         return old_tuple[0]
 
     def get(self, resource_name, key, max_age, cleanup_pretrigger=None):
-        
-        trigger_given_phrase = ('None' 
-                                if cleanup_pretrigger == None 
+
+        trigger_given_phrase = ('None'
+                                if cleanup_pretrigger == None
                                 else '<given>')
 
-        _logger.debug("CacheRegistry.get(%s,%s,%s,%s)" % 
+        _logger.debug("CacheRegistry.get(%s,%s,%s,%s)" %
                       (resource_name, key, max_age, trigger_given_phrase))
 
         with CacheRegistry.__rlock:
@@ -81,25 +81,25 @@ class CacheRegistry(object):
 
             if max_age != None and \
                (datetime.now() - timestamp).seconds > max_age:
-                self.__cleanup_entry(resource_name, key, False, 
+                self.__cleanup_entry(resource_name, key, False,
                                      cleanup_pretrigger=cleanup_pretrigger)
                 raise CacheFault("Stale")
 
         return value
 
     def list_raw(self, resource_name):
-        
+
         _logger.debug("CacheRegistry.list(%s)" % (resource_name))
 
         with CacheRegistry.__rlock:
             return self.__cache[resource_name]
 
-    def exists(self, resource_name, key, max_age, cleanup_pretrigger=None, 
+    def exists(self, resource_name, key, max_age, cleanup_pretrigger=None,
                no_fault_check=False):
 
-        _logger.debug("CacheRegistry.exists(%s,%s,%s,%s)" % 
+        _logger.debug("CacheRegistry.exists(%s,%s,%s,%s)" %
                       (resource_name, key, max_age, cleanup_pretrigger))
-        
+
         with CacheRegistry.__rlock:
             try:
                 (value, timestamp) = self.__cache[resource_name][key]
@@ -108,7 +108,7 @@ class CacheRegistry(object):
 
             if max_age is not None and not no_fault_check and \
                     (datetime.now() - timestamp).seconds > max_age:
-                self.__cleanup_entry(resource_name, key, False, 
+                self.__cleanup_entry(resource_name, key, False,
                                      cleanup_pretrigger=cleanup_pretrigger)
                 return False
 
@@ -118,7 +118,7 @@ class CacheRegistry(object):
 
         return len(self.__cache[resource_name])
 
-    def __cleanup_entry(self, resource_name, key, force, 
+    def __cleanup_entry(self, resource_name, key, force,
                         cleanup_pretrigger=None):
 
         _logger.debug("Doing clean-up for resource_name [%s] and key "

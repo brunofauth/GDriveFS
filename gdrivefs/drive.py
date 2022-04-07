@@ -1,11 +1,8 @@
 import logging
-import re
-import dateutil.parser
 import random
 import json
 import time
 import ssl
-import tempfile
 import pprint
 import functools
 import threading

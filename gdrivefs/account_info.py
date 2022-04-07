@@ -21,7 +21,7 @@ class AccountInfo(LiveReaderBase):
     def __getattr__(self, key):
         target = AccountInfo.__map[key]
         _type = None
-        
+
         if target.__class__ == tuple:
             (target, _type) = target
 

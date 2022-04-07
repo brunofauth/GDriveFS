@@ -15,26 +15,26 @@ class _DriveUtility(object):
 
 #    # Mime-types to translate to, if they appear within the "exportLinks" list.
 #    gd_to_normal_mime_mappings = {
-#            'application/vnd.google-apps.document':        
+#            'application/vnd.google-apps.document':
 #                'text/plain',
-#            'application/vnd.google-apps.spreadsheet':     
+#            'application/vnd.google-apps.spreadsheet':
 #                'application/vnd.ms-excel',
-#            'application/vnd.google-apps.presentation':    
+#            'application/vnd.google-apps.presentation':
 #/gd_to_normal_mime_mappings
 #                'application/vnd.ms-powerpoint',
-#            'application/vnd.google-apps.drawing':         
+#            'application/vnd.google-apps.drawing':
 #                'application/pdf',
-#            'application/vnd.google-apps.audio':           
+#            'application/vnd.google-apps.audio':
 #                'audio/mpeg',
-#            'application/vnd.google-apps.photo':           
+#            'application/vnd.google-apps.photo':
 #                'image/png',
-#            'application/vnd.google-apps.video':           
+#            'application/vnd.google-apps.video':
 #                'video/x-flv'
 #        }
 
     # Default extensions for mime-types.
 # TODO(dustin): !! Move this to the config directory.
-    default_extensions = { 
+    default_extensions = {
             'text/plain':                       'txt',
             'application/vnd.ms-excel':         'xls',
             'application/vnd.ms-powerpoint':    'ppt',
@@ -62,7 +62,7 @@ class _DriveUtility(object):
 #        except IOError:
 #            _logger.info("No mime-mapping was found.")
 
-        # Allow someone to set file-extensions for mime-types, and not rely on 
+        # Allow someone to set file-extensions for mime-types, and not rely on
         # Python's educated guesses.
 
         extension_mapping_filepath = \
@@ -76,9 +76,9 @@ class _DriveUtility(object):
 
     def get_first_mime_type_by_extension(self, extension):
 
-        found = [ 
-            mime_type 
-            for mime_type, temp_extension 
+        found = [
+            mime_type
+            for mime_type, temp_extension
             in list(self.default_extensions.items())
             if temp_extension == extension
         ]
@@ -94,7 +94,7 @@ class _DriveUtility(object):
         # fusepy doesn't support the Python 2.x Unicode type. Expect a native
         # string (anything but a byte string).
         return original_filename
-       
+
 #        # If we're in an older version of Python that still defines the Unicode
 #        # class and the filename isn't unicode, translate it.
 #
@@ -111,7 +111,7 @@ class _DriveUtility(object):
 
     def make_safe_for_filename(self, text):
         """Remove any filename-invalid characters."""
-    
+
         return re.sub('[^a-z0-9\-_\.]+', '', text)
 
 utility = _DriveUtility()
