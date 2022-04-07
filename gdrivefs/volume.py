@@ -599,11 +599,7 @@ class EntryCache(gdrivefs.cacheclient_base.CacheClientBase):
     """Manages our knowledge of file entries."""
 
     def __init__(self, *args, **kwargs):
-        super(EntryCache, self).__init__(*args, **kwargs)
-
-# TODO(dustin): This isn't used, and we don't think that it necessarily needs 
-#               to be instantiated, now.
-#        about = gdrivefs.account_info.AccountInfo.get_instance()
+        super().__init__(*args, **kwargs)
         self.__gd = gdrivefs.drive.get_gdrive()
 
     def __get_entries_to_update(self, requested_entry_id):
@@ -646,7 +642,6 @@ class EntryCache(gdrivefs.cacheclient_base.CacheClientBase):
     def __do_update_for_missing_entry(self, requested_entry_id):
 
         # Get the entries to update.
-
         affected_entries = self.__get_entries_to_update(requested_entry_id)
 
         # Read the entries, now.

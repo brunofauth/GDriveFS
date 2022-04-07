@@ -45,8 +45,8 @@ setuptools.setup(
     zip_safe=False,
     install_requires=install_requires,
     entry_points={"console_scripts": [
-        "gdfs=gdrivefs.scripts.gdfs:main",
-        "gdfstool=gdrivefs.scripts.gdfstool:main",
+        "gdfs"       "=gdrivefs.scripts.gdfs:main",
+        "gdfstool"   "=gdrivefs.scripts.gdfstool:main",
         "gdfsdumpentry=gdrivefs.scripts.gdfsdumpentry:main",
     ]}
 )

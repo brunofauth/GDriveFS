@@ -21,12 +21,6 @@ _logger = logging.getLogger(__name__)
 
 
 def _handle_auth_url():
-    # This is called because 'auth_cache_filepath' must be set for OauthAuthorize
-    # to be able to be instantiated, even though this particular setting is
-    # never used in the operations below!
-    gdrivefs.gdfuse.set_auth_cache_filepath(
-        gdrivefs.config.DEFAULT_CREDENTIALS_FILEPATH)
-
     oa = gdrivefs.oauth_authorize.OauthAuthorize()
     url = oa.step1_get_auth_url()
 
@@ -43,9 +37,6 @@ def _auth_write(authcode):
 
 
 def _handle_auth_automatic():
-    gdrivefs.gdfuse.set_auth_cache_filepath(
-        gdrivefs.config.DEFAULT_CREDENTIALS_FILEPATH)
-
     aa = gdrivefs.auto_auth.AutoAuth()
     aa.get_and_write_creds()
 
