@@ -373,7 +373,6 @@ class PathRelations(object):
 
         return children
 
-        _logger.debug("__load_all_children: [STOP] parent_id=[{}]".format(parent_id))
 
     def get_children_from_entry_id(self, entry_id):
         """Return the filenames contained in the folder with the given
