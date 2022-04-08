@@ -5,15 +5,13 @@ import pprint
 import math
 import collections
 
-from errno import ENOENT, EIO, ENOTDIR, ENOTEMPTY, EPERM, EEXIST
-from fuse import FUSE, Operations, FuseOSError, c_statvfs, fuse_get_context, \
-                 LoggingMixIn
+from errno import ENOENT, EIO, ENOTDIR, ENOTEMPTY, EPERM
+from fuse import FUSE, Operations, FuseOSError, fuse_get_context, LoggingMixIn
 
 import oauth2client
 
 from itertools import starmap
 from time import mktime, time
-from sys import argv, exit, excepthook
 from datetime import datetime
 from os.path import split
 
@@ -27,8 +25,7 @@ from gdrivefs.utility import utility
 from gdrivefs.change import get_change_manager
 from gdrivefs.volume import PathRelations, EntryCache, \
                                   CLAUSE_ENTRY, CLAUSE_PARENT, \
-                                  CLAUSE_CHILDREN, CLAUSE_ID, \
-                                  CLAUSE_CHILDREN_LOADED
+                                  CLAUSE_CHILDREN, CLAUSE_ID
 from gdrivefs.conf import Conf
 from gdrivefs.drive import get_gdrive
 from gdrivefs.account_info import AccountInfo
@@ -55,8 +52,6 @@ _YIELDED_ENTRY = \
 # TODO: Make sure that we rely purely on the FH, whenever it is given,
 #       whereever it appears. This will be to accomodate system calls that can work either via file-path or file-handle.
 
-def set_datetime_tz(datetime_obj, tz):
-    return datetime_obj.replace(tzinfo=tz)
 
 def get_entry_or_raise(raw_path, allow_normal_for_missing=False):
     try:

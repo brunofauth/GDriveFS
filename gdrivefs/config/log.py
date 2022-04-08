@@ -19,13 +19,6 @@ def configure(is_debug=gdrivefs.config.IS_DEBUG):
         sh.setFormatter(formatter)
         logger.addHandler(sh)
 
-    def _configure_file():
-        filepath = os.environ.get('GD_LOG_FILEPATH', '/tmp/gdrivefs.log')
-        fh = logging.FileHandler(filepath)
-        formatter = logging.Formatter('%(asctime)s [%(name)s %(levelname)s] %(message)s')
-        fh.setFormatter(formatter)
-        logger.addHandler(fh)
-
     def _configure_console():
         sh = logging.StreamHandler()
         formatter = logging.Formatter('%(asctime)s [%(name)s %(levelname)s] %(message)s')

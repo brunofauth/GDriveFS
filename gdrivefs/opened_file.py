@@ -16,7 +16,6 @@ from gdrivefs.displaced_file import DisplacedFile
 from gdrivefs.volume import PathRelations, EntryCache, path_resolver, \
                                   CLAUSE_ID, CLAUSE_ENTRY
 from gdrivefs.drive import get_gdrive
-from gdrivefs.buffer_segments import BufferSegments
 
 _LOGGER = logging.getLogger(__name__)
 

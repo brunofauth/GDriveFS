@@ -7,13 +7,6 @@ DTF_DATETIMET = '%Y-%m-%dT%H:%M:%S'
 DTF_DATE = '%Y%m%d'
 DTF_TIME = '%H%M%S'
 
-def get_normal_dt_from_rfc3339_phrase(phrase):
-    stripped = phrase[:phrase.rindex('.')]
-    dt = datetime.strptime(stripped, DTF_DATETIMET).replace(tzinfo=tzutc())
-
-#    print("get_normal_dt_from_rfc3339_phrase(%s) => %s" % (phrase, dt))
-
-    return dt
 
 def build_rfc3339_phrase(datetime_obj):
     datetime_phrase = datetime_obj.strftime(DTF_DATETIMET)
