@@ -9,10 +9,13 @@ import gdrivefs.errors
 
 _logger = logging.getLogger(__name__)
 
-def dec_hint(argument_names=[], excluded=[], prefix='', otherdata_cb=None):
+def dec_hint(argument_names=None, excluded=None, prefix='', otherdata_cb=None):
     """A decorator for the calling of functions to be emphasized in the
     logging. Displays prefix and suffix information in the logs.
     """
+
+    argument_names = [] if argument_names is None else argument_names
+    excluded = [] if excluded is None else excluded
 
     # We use a serial-number so that we can eyeball corresponding pairs of
     # beginning and ending statements in the logs.
