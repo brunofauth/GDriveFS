@@ -9,6 +9,8 @@
 /bin
 /include
 /.venv/
+/makepkg.d/*
+!/makepkg.d/PKGBUILD
 
 /vagrant/sample_files
 /vagrant/.packages
