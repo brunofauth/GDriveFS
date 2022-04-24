@@ -861,7 +861,8 @@ def mount(auth_storage_filepath, use_pass: bool, mountpoint, debug=None, nothrea
     # during the communication.
     oauth2_version = tuple([int(c) for c in oauth2client.__version__.split('.')])
     if oauth2_version >= (4, 0, 0):
-        raise Exception("Google does not like oauth2client >=4.0.0 .")
+        # raise Exception("Google does not like oauth2client >=4.0.0 .")
+        pass
 
     fuse_opts = {}
 
