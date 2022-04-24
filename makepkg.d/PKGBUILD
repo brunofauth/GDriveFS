@@ -1,0 +1,33 @@
+# Maintainer: Bruno Fauth <bvfauth@hotmail.com>
+
+_name=gdfs
+_git_name=gdrivefs
+pkgname="python-$_name-git"
+pkgver='0.14.13'
+pkgrel=0
+pkgdesc="Access 'Google Drive' as a FUSE"
+
+arch=('any')
+url="https://github.com/brunofauth/GDriveFS"
+license=('MIT')
+
+depends=('python' 'python-fusepy' 'python-oauth2client' 'python-google-api-python-client' 'python-httplib2' 'python-dateutil')
+makedepends=('python-setuptools')
+
+source=("git+file:///home/bruno/cln/gdrivefs/")
+# source=("git+https://github.com/brunofauth/GDriveFS.git")
+md5sums=('SKIP')
+
+
+build() {
+    cd "$srcdir/$_git_name"
+    python setup.py build
+}
+
+
+package() {
+    cd "$srcdir/$_git_name"
+    python setup.py install --skip-build --root="$pkgdir" --optimize=1
+    # install -Dm644 "shared_files/fish_completion.fish" "$pkgdir/usr/share/fish/completions/$_name.fish"
+}
+
